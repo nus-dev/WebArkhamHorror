@@ -15,8 +15,11 @@ npm
 Webpack
 
 # Install
-Install Git  
-Install Nodejs  
-Install VisualStudio Code  
-Git Clone  
-npm install  
+1. Install Git  
+https://git-scm.com/  
+2. Install Nodejs  
+https://nodejs.org/ko/download/  
+3. Install Visual Studio Code  
+https://code.visualstudio.com/  
+4. Git Clone  
+5. npm install  
