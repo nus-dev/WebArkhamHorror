@@ -23,3 +23,8 @@ https://nodejs.org/ko/download/
 https://code.visualstudio.com/  
 4. Git Clone  
 5. npm install  
+
+# Test
+1. npm run watch
+2. npm run server
+3. localhost:8080
