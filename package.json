@@ -1,0 +1,29 @@
+{
+  "name": "reaction",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@babel/core": "^7.9.6",
+    "@types/express": "^4.17.6",
+    "babel-loader": "^8.1.0",
+    "express": "^4.17.1",
+    "http": "0.0.1-security",
+    "tsc": "^1.20150623.0",
+    "tslint": "^6.1.2"
+  },
+  "devDependencies": {
+    "source-map-loader": "^0.2.4",
+    "ts-loader": "^7.0.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack --watch --watch-poll",
+    "server": "node ./dist/server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
