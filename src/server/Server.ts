@@ -17,7 +17,9 @@ class Server {
         });
 
         app.use('/src', express.static(path.join(basePath, 'src')));
-        app.use('/node_modules', express.static(path.join(basePath, 'node_modules')));
+        app.use('/css', express.static(path.join(basePath, 'css')));
+        app.use('/resources', express.static(path.join(basePath, 'resources')));
+        // app.use('/node_modules', express.static(path.join(basePath, 'node_modules')));
         app.use('/dist', express.static(path.join(basePath, 'dist')));
 
         const httpServer: http.Server = http.createServer(app).listen(Server.PORT, () => {

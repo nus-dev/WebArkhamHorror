@@ -1,0 +1,11 @@
+#headerWrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    width: 100%;
+    height: 48px;
+    box-sizing: border-box;
+    /* border-bottom: 1px solid rgba(37, 40, 47, 0.1); */
+    height: 0px;
+}

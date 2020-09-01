@@ -1,0 +1,22 @@
+#characterStatus {
+    width: 800px;
+    height: 150px;
+    bottom: 0px;
+    background-color: blue;
+    display: flex;
+    text-align: center;
+    margin: 0px auto;
+}
+
+#characterFace {
+    width: 150px;
+    background-image: url('/resources/image/investigator/아만다샤프.jpg');
+    background-position-x: -2px;
+    background-position-y: 0px;
+    background-size: 300px 415px;
+}
+
+#characterStat {
+    width: 150px;
+    background-color: purple;
+}

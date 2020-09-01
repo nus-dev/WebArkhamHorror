@@ -1,0 +1,41 @@
+#appHeader {
+    overflow: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    width: 100%;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    background-color: red;
+    box-sizing: border-box;
+    color: rgba(37, 40, 47, 0.65);
+    height: 0px;
+}
+
+#appFooter {
+    background-color: transparent;
+    overflow: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: absolute;
+    width: 100%;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    /* background-color: #fff; */
+    box-sizing: border-box;
+    color: rgba(37, 40, 47, 0.65);
+    height: 150px;
+    bottom: 0px;
+}
+
+#gameBoard {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    top: 0px;
+    min-height: 100%;
+}
