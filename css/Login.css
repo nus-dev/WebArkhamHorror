@@ -1,0 +1,71 @@
+#login {
+    width: 100%; 
+    height: 100%; 
+    position: absolute; 
+    left: 0px; 
+    top: 0px; 
+    background-color: white; 
+    z-index: 9999;
+}
+
+/* #login > input {
+    width: 300px; 
+    height: 100px; 
+}
+
+#login > button {
+    width: 300px; 
+    height: 100px; 
+} */
+
+.user-login-box {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+}
+
+.title-box {
+    text-align: center;
+    height: 64px;
+}
+
+.floating-label-text-box {
+    width: 100%;
+    height: 100%;
+    transition: all 200ms;
+    padding-left: 2.5px !important;
+    cursor: text;
+    position: absolute;
+
+    text-align: left !important;
+    position: relative;
+    width: 99%;
+    height: 24px;
+}
+
+.fltb-input {
+    border: 0;
+    border-bottom: 1px solid #22CC88;
+}
+
+.fltb-label {
+    font-size: 12px;
+    transform: translate3d(0, -64%, 0);
+    opacity: 1;
+    cursor: default;
+    color: #22CC88;
+}
+
+.btnLogin {
+    width: 200px;
+    height: 50px;
+}
+
+label.warning {
+    color: #FF5252;
+    border-color: #FF5252;
+}
+
+input.warning {
+    border-color: #FF5252;
+}
