@@ -22,15 +22,10 @@ class Client {
                 -6, -16, -26, -36, -46, -56, -66, -76, -86, -96,
             ]
 
-            let targets = targets3.map(x => x * 0.75);
+            let targets = targets5.map(x => x);
 
 
             sample.onload = () => {
-
-                // let w: number, h: number;
-
-                // w = canvas.width = 500;
-                // h = canvas.height = 600;
 
                 let ctx = canvas.getContext("2d");
                 var contours = createContours(ctx, targets);
@@ -39,6 +34,9 @@ class Client {
                 ctx.strokeStyle = '#000'
 
                 drawContours(contours, ctx);
+
+                // drawContours(contours, ctx, ()=>{});
+                // drawContours(contours, ctx, (ring) => console.log(ring));
                 console.log(contours);
             }
 
@@ -76,6 +74,7 @@ class Client {
                         .map((alpha: number) => alpha < 0.5 ? transparent : opaque)
                 );
                 // console.log(values)
+
                 // 라이브러리 bitmap-sdf에서 거리 값을 임의로 [0,1]범위에 맞춘다
                 // https://github.com/dy/bitmap-sdf/blob/master/index.js#L86
                 // 따라서 거리 값을 온전히 얻고 싶다면 radius와 cutoff를 적절히 설정해야 한다.
@@ -100,7 +99,7 @@ class Client {
             }
 
             /**등고선을 그린다.*/
-            function drawContours(contours: any, ctx: CanvasRenderingContext2D) {
+            function drawContours(contours: any, ctx: CanvasRenderingContext2D, drawer = drawLinearring) {
                 contours.forEach((contour: { value: number; coordinates: any[][]; }) => {
                     let hue = (contour.value * 5) % 360;
                     ctx.strokeStyle = 'hsl(' + hue + ',100%,50%)';
@@ -112,14 +111,14 @@ class Client {
                         polygon = polygon.slice(0, 1);
 
                         polygon.forEach((linearring: any[]) => {
-                            drawLinearring(ctx, linearring);
+                            drawer(linearring, ctx);
                         });
                     });
                 });
             }
 
             //폐곡선 그리기
-            function drawLinearring(ctx: CanvasRenderingContext2D, linearring: any[]) {
+            function drawLinearring(linearring: any[], ctx: CanvasRenderingContext2D) {
                 ctx.beginPath();
                 let last = linearring[linearring.length - 1];
                 ctx.moveTo(last[0], last[1]);
