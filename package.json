@@ -11,6 +11,7 @@
     "babel-loader": "^8.1.0",
     "body-parser": "^1.19.0",
     "d3-contour": "^2.0.0",
+    "bitmap-sdf": "^1.0.3",
     "express": "^4.17.1",
     "http": "0.0.1-security",
     "install": "^0.13.0",
