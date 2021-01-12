@@ -38,17 +38,20 @@ class Client {
             -6, -16, -26, -36, -46, -56, -66, -76, -86, -96,
         ]
 
-        const targets: Array<number> = targets2.map(x => x);
 
-        const srcPath = "./resources/image/sample_400_500.png";
+        // const srcPath = "./resources/image/sample_400_500.png";
         // const srcPath = "./resources/image/sample_1000_1000.png";
         // const srcPath = "./resources/image/sample_1080_1080.png";
         //const srcPath = "./resources/image/sample_5000_5000.png";
+        const srcPath = "./resources/image/sample_inputs/input_00008.png";
 
         const image: HTMLImageElement = await this.loadImage(srcPath);
         const ctx = this.canvas.getContext('2d');
 
 
+        // const targets: Array<number> = targets2.map(x => x);
+        const targets: Array<number> = [(image.width+image.height)/2]
+        
         const maxAbsoluteValueOfTargets = Math.ceil(
             targets
                 .map(Math.abs)
@@ -83,30 +86,38 @@ class Client {
 
         ctx.clearRect(0,0,this.canvas.width, this.canvas.height)
         const mycontours = this.createContours(distance, [mytarget],margin,dimension)
-        console.log(mycontours)
         this.drawContours(mycontours,ctx)
 
-        // var path = new Path2D();
-        // // 외각선을 path로 변환하는 함수
-        // function fillPolygon(linearring: Array<Array<number>>, ctx: CanvasRenderingContext2D): void {
-        //     const firstPosition = linearring[0]
-        //     path.moveTo(firstPosition[0], firstPosition[1])
-        //     linearring.forEach(position => {
-        //         path.lineTo(position[0], position[1])
-        //     });
-        //     path.closePath()
-        // }
-        // this.drawContours(contours, ctx, fillPolygon)
+        var path = new Path2D();
+        // 외각선을 path로 변환하는 함수
+        function fillPolygon(linearring: Array<Array<number>>, ctx: CanvasRenderingContext2D): void {
+            const firstPosition = linearring[0]
+            path.moveTo(firstPosition[0], firstPosition[1])
+            linearring.forEach(position => {
+                path.lineTo(position[0], position[1])
+            });
+            path.closePath()
+        }
+        this.drawContours(mycontours, ctx, fillPolygon)
 
-        //원본, 외각선, 
-
+        
         // // 얻은 path 안을 채우기
-        // ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        // ctx.save()
-        // ctx.fillStyle = '#ffff'
-        // ctx.fill(path)
-        // ctx.restore()
+        const m2 = - mytarget+30
+        const [w2,h2] = this.marginalDimension(m2,image)
+        this.canvas.width = w2
+        this.canvas.height = h2
 
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.clearRect(0+10, 0+10, this.canvas.width-20, this.canvas.height-20);
+        ctx.drawImage(image, m2,m2)
+        
+        ctx.save()
+        ctx.translate(-margin+m2,-margin+m2)
+        ctx.fillStyle = '#000'
+        ctx.stroke(path)
+        ctx.restore()
+
+        
 
         // this.drawContours(contours, ctx, ()=>{});
         // this.drawContours(contours, ctx, (ring) => console.log(ring));
