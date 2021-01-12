@@ -28,7 +28,7 @@ class Client {
 
     private async draw() {
         const targets0: number[] = []
-        const targets1 = [-30]
+        const targets1 = [0]
         const targets2 = [-30, -35]
         const targets3 = [-15, -30, -45]
         const targets5 = [0, -10, -20, -30, -40]
@@ -38,7 +38,7 @@ class Client {
             -6, -16, -26, -36, -46, -56, -66, -76, -86, -96,
         ]
 
-        const targets: Array<number> = targets2.map(x => x);
+        const targets: Array<number> = targets1.map(x => x);
 
         // const srcPath = "./resources/image/sample_400_500.png";
         // const srcPath = "./resources/image/sample_1000_1000.png";
@@ -49,7 +49,28 @@ class Client {
         const ctx = this.canvas.getContext('2d');
 
         const contours = this.createContours(ctx, targets, image);
-        this.drawContours(contours, ctx);
+
+        // 기존 그림 위에 등고선 그리기
+        // this.drawContours(contours, ctx);
+
+        var path = new Path2D();
+        // 외각선을 path로 변환하는 함수
+        function fillPolygon(linearring: Array<Array<number>>, ctx: CanvasRenderingContext2D): void{
+            const firstPosition = linearring[0]
+            path.moveTo(firstPosition[0],firstPosition[1])
+            linearring.forEach(position => {
+                path.lineTo(position[0],position[1])                
+            });
+            path.closePath()
+        }
+        this.drawContours(contours,ctx,fillPolygon)
+
+        // 얻은 path 안을 채우기
+        ctx.clearRect(0,0,this.canvas.width, this.canvas.height);
+        ctx.save()
+        ctx.fillStyle = '#ffff'
+        ctx.fill(path)
+        ctx.restore()
 
 
         // this.drawContours(contours, ctx, ()=>{});
@@ -64,12 +85,17 @@ class Client {
             contour.coordinates.forEach((polygon: number[][][]) => {
                 //polygon은 linearring의 배열로 첫 요소는 가장 바깥 폐곡선이다
 
-                //가장 바깥 테두리만 가져오기
-                polygon = polygon.slice(0, 1);
+                // //가장 바깥 테두리만 가져오기
+                // if(polygon.length===0){return;}
+                // const firstPolygon = polygon[0]
+                // polygon = polygon.slice(1)
 
                 polygon.forEach((linearring: number[][]) => {
                     drawer(linearring, ctx);
                 });
+
+
+
             });
         });
     }
@@ -127,12 +153,12 @@ class Client {
         // 따라서 거리 값을 온전히 얻고 싶다면 radius와 cutoff를 적절히 설정해야 한다.
         // radius는 적당히 큰 수로 그림에서 등고선까지 거리의 두배 보다 크면 된다.
         // cutoff는 0.5; [0,1] 사이의 값으로 radius의 기준이 된다.
-        const radius = margin * 16
+        const radius = margin * 16+1
         const cutoff = 0.5;
 
         // values는 Float32Array로 할 것
         // Uint8ClampedArray일 경우 distance가 의도치 않은 손실 발생
-        console.log(sdf)
+        console.log(values)
         let distance = sdf(values, { radius: radius, width: width, height: height, cutoff: cutoff });
 
         // [0,1]범위로 축소된 거리를 복원하는 함수
