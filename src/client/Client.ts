@@ -39,11 +39,12 @@ class Client {
         ]
 
 
+        // const srcPath = "./resources/image/sample_diagonal_point.png";
         // const srcPath = "./resources/image/sample_400_500.png";
         // const srcPath = "./resources/image/sample_1000_1000.png";
         // const srcPath = "./resources/image/sample_1080_1080.png";
-        //const srcPath = "./resources/image/sample_5000_5000.png";
-        const srcPath = "./resources/image/sample_inputs/input_00008.png";
+        // const srcPath = "./resources/image/sample_5000_5000.png";
+        const srcPath = "./resources/image/sample_inputs/input_00002.png";
 
         const image: HTMLImageElement = await this.loadImage(srcPath);
         const ctx = this.canvas.getContext('2d');
@@ -56,36 +57,48 @@ class Client {
             targets
                 .map(Math.abs)
                 .reduce((acc, val) => Math.max(acc, val)));
-        const margin = maxAbsoluteValueOfTargets;
+        const margin = maxAbsoluteValueOfTargets*0;
         const dimension = this.marginalDimension(margin, image);
         const distance = this.createSDF(ctx, margin, image)
-        const contours = this.createContours(distance, targets, margin, dimension);
+        const contours = this.createContours(distance, targets, dimension);
 
         // 기존 그림 위에 등고선 그리기
         this.drawContours(contours, ctx);
 
         // targetFunction(x) <= target 를 만족하는 x
-        function binarySearch(start: number, end: number, epsilon: number, target: number, targetFunction: Function): number {
+        function binarySearch(start: number, end: number, epsilon: number, target: number, targetFunction: Function, depth:number=0): number {
             if (start + epsilon > end) { return start }
             const mid = (start + end) / 2;
             const guessValue = targetFunction(mid);
-            console.log(mid, guessValue)
+            console.log(depth, mid, guessValue)
             if (target < guessValue) {
                 end = mid;
             }
             else {
                 start = mid;
             }
-            return binarySearch(start, end, epsilon, target, targetFunction)
+            return binarySearch(start, end, epsilon, target, targetFunction,depth+1)
         }
 
-        const polygonCounter = (target:number)=>{return this.createContours(distance, [target],margin,dimension)[0].coordinates.length}
 
+        const polygonCounter = (target:number)=>{return this.createContours(distance, [target],dimension)[0].coordinates.length}
+
+        // mytarget 구하기 위해 미리 distance 구할 때 margin 안줘도 됨
+        //덩어리 끼리 만나는 것은 이미지 보다 안쪽에서 만나기 때문
         const mytarget = binarySearch(-(image.width+image.height)/2,0, 1, 1, polygonCounter)
-        console.log(mytarget)
+        let minval = 0;
+        let minidx = -1;
+        for (let index = 0; index < distance.length; index++) {
+            const element = distance[index];
+            if(element<minval){minval = element;minidx = index}
+            
+        }
+        console.log(mytarget, minval, minidx)
 
         ctx.clearRect(0,0,this.canvas.width, this.canvas.height)
-        const mycontours = this.createContours(distance, [mytarget],margin,dimension)
+        const mydistance = this.createSDF(ctx,Math.ceil(-mytarget),image)
+        const mydimension = this.marginalDimension(Math.ceil(-mytarget),image)
+        const mycontours = this.createContours(mydistance, [mytarget],mydimension)
         this.drawContours(mycontours,ctx)
 
         var path = new Path2D();
@@ -112,11 +125,30 @@ class Client {
         ctx.drawImage(image, m2,m2)
         
         ctx.save()
-        ctx.translate(-margin+m2,-margin+m2)
+        ctx.translate(30,30)
         ctx.fillStyle = '#000'
         ctx.stroke(path)
         ctx.restore()
 
+        // ctx.save()
+        // for (let index = 0,k=0;k < distance.length; index++) {
+        //     for (let j = 0; j < dimension[0]; j++) {
+                
+        //         const element = distance[k];
+        //         const bright = -Math.ceil(element/2.6)
+        //         ctx.fillStyle = 'hsl(0,100%,'+bright+'%)'
+        //         ctx.fillRect(index, j, 1, 1)
+        //         k++
+        //     }
+            
+        // }
+        // ctx.restore()
+        
+        // ctx.canvas.width = 500
+        // ctx.canvas.height = 500
+        // ctx.clearRect(0,0,500,500);
+        // ctx.fillRect(0,0,1,1);
+        // ctx.fillRect(498,498,1,1)
         
 
         // this.drawContours(contours, ctx, ()=>{});
@@ -200,7 +232,7 @@ class Client {
         // 따라서 거리 값을 온전히 얻고 싶다면 radius와 cutoff를 적절히 설정해야 한다.
         // radius는 적당히 큰 수로 그림에서 등고선까지 거리의 두배 보다 크면 된다.
         // cutoff는 0.5; [0,1] 사이의 값으로 radius의 기준이 된다.
-        const radius = margin * 16 + 1
+        const radius = margin * 16 + 10000
         const cutoff = 0.5;
 
         // values는 Float32Array로 할 것
@@ -214,7 +246,7 @@ class Client {
         return distance;
 
     }
-    private createContours(distance: any, targets: Array<number>, margin: number, dimension: [number, number]) {
+    private createContours(distance: any, targets: Array<number>,dimension: [number, number]) {
 
         // 등고선 적용
         const contours4 = contours()
