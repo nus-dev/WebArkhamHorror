@@ -40,11 +40,12 @@ class Client {
 
 
         // const srcPath = "./resources/image/sample_diagonal_point.png";
+        const srcPath = "./resources/image/sample_800.png";
         // const srcPath = "./resources/image/sample_400_500.png";
         // const srcPath = "./resources/image/sample_1000_1000.png";
         // const srcPath = "./resources/image/sample_1080_1080.png";
         // const srcPath = "./resources/image/sample_5000_5000.png";
-        const srcPath = "./resources/image/sample_inputs/input_00002.png";
+        // const srcPath = "./resources/image/sample_inputs/input_00002.png";
 
         const image: HTMLImageElement = await this.loadImage(srcPath);
         const ctx = this.canvas.getContext('2d');
