@@ -8,6 +8,7 @@ import * as calcSDF from 'bitmap-sdf';
 
 class Client {
     private canvas: HTMLCanvasElement;
+    private drawScale: number = 1;
 
     constructor() {
         const playGround: HTMLDivElement = document.getElementById('playGround') as HTMLDivElement;
@@ -40,12 +41,12 @@ class Client {
 
 
         // const srcPath = "./resources/image/sample_diagonal_point.png";
-        const srcPath = "./resources/image/sample_800.png";
+        // const srcPath = "./resources/image/sample_800.png";
         // const srcPath = "./resources/image/sample_400_500.png";
         // const srcPath = "./resources/image/sample_1000_1000.png";
         // const srcPath = "./resources/image/sample_1080_1080.png";
         // const srcPath = "./resources/image/sample_5000_5000.png";
-        // const srcPath = "./resources/image/sample_inputs/input_00002.png";
+        const srcPath = "./resources/image/sample_inputs/input_00005.png";
 
         const image: HTMLImageElement = await this.loadImage(srcPath);
         const ctx = this.canvas.getContext('2d');
@@ -104,29 +105,29 @@ class Client {
 
         var path = new Path2D();
         // 외각선을 path로 변환하는 함수
-        function fillPolygon(linearring: Array<Array<number>>, ctx: CanvasRenderingContext2D): void {
+        function fillPolygon(linearring: Array<Array<number>>, ctx: CanvasRenderingContext2D, drawScale:number): void {
             const firstPosition = linearring[0]
-            path.moveTo(firstPosition[0], firstPosition[1])
+            path.moveTo(firstPosition[0]/drawScale-1/drawScale, firstPosition[1]/drawScale-1/drawScale)
             linearring.forEach(position => {
-                path.lineTo(position[0], position[1])
+                path.lineTo(position[0]/drawScale-1/drawScale, position[1]/drawScale-1/drawScale)
             });
             path.closePath()
         }
         this.drawContours(mycontours, ctx, fillPolygon)
 
-        
         // // 얻은 path 안을 채우기
-        const m2 = - mytarget+30
+        ctx.save()
+
+        const m2 = - mytarget
         const [w2,h2] = this.marginalDimension(m2,image)
-        this.canvas.width = w2
-        this.canvas.height = h2
+        this.canvas.width = w2/this.drawScale+30
+        this.canvas.height = h2/this.drawScale+30
 
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         ctx.clearRect(0+10, 0+10, this.canvas.width-20, this.canvas.height-20);
+
+        ctx.translate(15,15)
         ctx.drawImage(image, m2,m2)
-        
-        ctx.save()
-        ctx.translate(30,30)
         ctx.fillStyle = '#000'
         ctx.stroke(path)
         ctx.restore()
@@ -171,7 +172,7 @@ class Client {
 
                 polygon = polygon.slice(0,1)
                 polygon.forEach((linearring: number[][]) => {
-                    drawer(linearring, ctx);
+                    drawer(linearring, ctx,this.drawScale);
                 });
 
 
@@ -183,9 +184,9 @@ class Client {
     //폐곡선 그리기
     //input: Array of points
     //effect: Draw a linear-ring on the CanvasRenderingContext2D
-    private drawLinearring(linearring: Array<Array<number>>, ctx: CanvasRenderingContext2D): void {
+    private drawLinearring(linearring: Array<Array<number>>, ctx: CanvasRenderingContext2D, drawScale:number): void {
         ctx.save();
-
+        ctx.scale(1/drawScale, 1/drawScale)
         ctx.beginPath();
         const last = linearring[linearring.length - 1];
         ctx.moveTo(last[0], last[1]);
@@ -199,8 +200,8 @@ class Client {
     }
 
     private marginalDimension(margin: number, image: HTMLImageElement): [number, number] {
-        const width = image.width + margin * 2;
-        const height = image.height + margin * 2;
+        const width = Math.ceil(image.width*this.drawScale + margin * 2);
+        const height = Math.ceil(image.height*this.drawScale + margin * 2);
         return [width, height]
 
     }
@@ -208,8 +209,7 @@ class Client {
     //side-effect: 캔버스 더러워짐
     private createSDF(ctx: CanvasRenderingContext2D, margin: number, image: HTMLImageElement): Array<number> {
 
-        const width = image.width + margin * 2;
-        const height = image.height + margin * 2;
+        const [width, height] = this.marginalDimension(margin,image);
 
         ctx.canvas.width = width;
         ctx.canvas.height = height;
@@ -217,7 +217,7 @@ class Client {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
         //샘플 이미지를 그린다.
-        ctx.drawImage(image, margin, margin);
+        ctx.drawImage(image, margin, margin, image.width*this.drawScale, image.height*this.drawScale);
 
         const opaque = 1;
         const transparent = 0;
@@ -251,7 +251,7 @@ class Client {
 
         // 등고선 적용
         const contours4 = contours()
-            .size(dimension)
+            .size(dimension).smooth(false)
             .thresholds(targets)(distance);
         return contours4;
     }
