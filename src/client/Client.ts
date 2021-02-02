@@ -5,6 +5,7 @@
 
 import { contours } from 'd3-contour';
 import * as calcSDF from 'bitmap-sdf';
+import * as potrace from "potrace";
 
 class Client {
     private canvas: HTMLCanvasElement;
