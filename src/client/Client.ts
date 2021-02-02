@@ -5,7 +5,9 @@
 
 import { contours } from 'd3-contour';
 import * as calcSDF from 'bitmap-sdf';
-import * as potrace from "potrace";
+// import * as potrace from 'potrace';
+let potrace = require('potrace');
+import * as jimp from 'jimp';
 
 class Client {
     private canvas: HTMLCanvasElement;
@@ -30,7 +32,7 @@ class Client {
 
     private async draw() {
         const targets0: number[] = []
-        const targets1 = [0]
+        const targets1 = [-30]
         const targets2 = [-30, -1000]
         const targets3 = [-15, -30, -45]
         const targets5 = [0, -10, -20, -30, -40]
@@ -39,8 +41,6 @@ class Client {
             -3, -13, -23, -33, -43, -53, -63, -73, -83, -93,
             -6, -16, -26, -36, -46, -56, -66, -76, -86, -96,
         ]
-
-
         // const srcPath = "./resources/image/sample_diagonal_point.png";
         // const srcPath = "./resources/image/sample_800.png";
         // const srcPath = "./resources/image/sample_400_500.png";
@@ -53,23 +53,59 @@ class Client {
         const ctx = this.canvas.getContext('2d');
 
 
-        // const targets: Array<number> = targets2.map(x => x);
-        const targets: Array<number> = [(image.width+image.height)/2]
-        
+        const targets: Array<number> = targets1.map(x => x);
+        // const targets: Array<number> = [(image.width+image.height)/2]
+
         const maxAbsoluteValueOfTargets = Math.ceil(
             targets
                 .map(Math.abs)
                 .reduce((acc, val) => Math.max(acc, val)));
-        const margin = maxAbsoluteValueOfTargets*0;
+        const margin = maxAbsoluteValueOfTargets * 0;
         const dimension = this.marginalDimension(margin, image);
         const distance = this.createSDF(ctx, margin, image)
         const contours = this.createContours(distance, targets, dimension);
 
+        const [width, height] = this.marginalDimension(margin, image);
+
         // 기존 그림 위에 등고선 그리기
         this.drawContours(contours, ctx);
 
+
+        let po = new potrace.Potrace();
+        // po.loadImage(ctx.getImageData(0,0,width,height).data,function(){
+        //     console.log(po.getSVG())
+        // })
+
+        jimp.read(srcPath, function () {
+            let data = new Uint8ClampedArray(distance.length * 4)
+            for (let index = 0; index < distance.length; index++) {
+                const element = distance[index];
+                data[index * 4 + 0] = element > targets[0] ? 0 : 255
+                data[index * 4 + 1] = element > targets[0] ? 0 : 255
+                data[index * 4 + 2] = element > targets[0] ? 0 : 255
+                data[index * 4 + 3] = element > targets[0] ? 255 : 0
+
+            }
+            let aa = new ImageData(data, width, height);
+            ctx.clearRect(0, 0, width, height)
+            // ctx.putImageData(aa, 0, 0)
+            this.bitmap.data = Buffer.from(aa.data)
+            ctx.clearRect(0, 0, width, height)
+            ctx.drawImage(image, 0, 0)
+            po.loadImage(this, function () {
+                let p = new Path2D(po.getPathTag().slice(9))
+                ctx.stroke(p)
+                console.log(po.getSVG())
+            })
+        })
+
+
+
+
+
+
         // targetFunction(x) <= target 를 만족하는 x
-        function binarySearch(start: number, end: number, epsilon: number, target: number, targetFunction: Function, depth:number=0): number {
+        function binarySearch(start: number, end: number, epsilon: number, target: number, targetFunction: Function, depth: number = 0): number {
             if (start + epsilon > end) { return start }
             const mid = (start + end) / 2;
             const guessValue = targetFunction(mid);
@@ -80,82 +116,12 @@ class Client {
             else {
                 start = mid;
             }
-            return binarySearch(start, end, epsilon, target, targetFunction,depth+1)
+            return binarySearch(start, end, epsilon, target, targetFunction, depth + 1)
         }
 
 
-        const polygonCounter = (target:number)=>{return this.createContours(distance, [target],dimension)[0].coordinates.length}
+        const polygonCounter = (target: number) => { return this.createContours(distance, [target], dimension)[0].coordinates.length }
 
-        // mytarget 구하기 위해 미리 distance 구할 때 margin 안줘도 됨
-        //덩어리 끼리 만나는 것은 이미지 보다 안쪽에서 만나기 때문
-        const mytarget = binarySearch(-(image.width+image.height)/2,0, 1, 1, polygonCounter)
-        let minval = 0;
-        let minidx = -1;
-        for (let index = 0; index < distance.length; index++) {
-            const element = distance[index];
-            if(element<minval){minval = element;minidx = index}
-            
-        }
-        console.log(mytarget, minval, minidx)
-
-        ctx.clearRect(0,0,this.canvas.width, this.canvas.height)
-        const mydistance = this.createSDF(ctx,Math.ceil(-mytarget),image)
-        const mydimension = this.marginalDimension(Math.ceil(-mytarget),image)
-        const mycontours = this.createContours(mydistance, [mytarget],mydimension)
-        this.drawContours(mycontours,ctx)
-
-        var path = new Path2D();
-        // 외각선을 path로 변환하는 함수
-        function fillPolygon(linearring: Array<Array<number>>, ctx: CanvasRenderingContext2D, drawScale:number): void {
-            const firstPosition = linearring[0]
-            path.moveTo(firstPosition[0]/drawScale-1/drawScale, firstPosition[1]/drawScale-1/drawScale)
-            linearring.forEach(position => {
-                path.lineTo(position[0]/drawScale-1/drawScale, position[1]/drawScale-1/drawScale)
-            });
-            path.closePath()
-        }
-        this.drawContours(mycontours, ctx, fillPolygon)
-
-        // // 얻은 path 안을 채우기
-        ctx.save()
-
-        const m2 = - mytarget
-        const [w2,h2] = this.marginalDimension(m2,image)
-        this.canvas.width = w2/this.drawScale+30
-        this.canvas.height = h2/this.drawScale+30
-
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        ctx.clearRect(0+10, 0+10, this.canvas.width-20, this.canvas.height-20);
-
-        ctx.translate(15,15)
-        ctx.drawImage(image, m2,m2)
-        ctx.fillStyle = '#000'
-        ctx.stroke(path)
-        ctx.restore()
-
-        // ctx.save()
-        // for (let index = 0,k=0;k < distance.length; index++) {
-        //     for (let j = 0; j < dimension[0]; j++) {
-                
-        //         const element = distance[k];
-        //         const bright = -Math.ceil(element/2.6)
-        //         ctx.fillStyle = 'hsl(0,100%,'+bright+'%)'
-        //         ctx.fillRect(index, j, 1, 1)
-        //         k++
-        //     }
-            
-        // }
-        // ctx.restore()
-        
-        // ctx.canvas.width = 500
-        // ctx.canvas.height = 500
-        // ctx.clearRect(0,0,500,500);
-        // ctx.fillRect(0,0,1,1);
-        // ctx.fillRect(498,498,1,1)
-        
-
-        // this.drawContours(contours, ctx, ()=>{});
-        // this.drawContours(contours, ctx, (ring) => console.log(ring));
         console.log(contours);
     }
 
@@ -171,9 +137,9 @@ class Client {
                 // const firstPolygon = polygon[0]
                 // polygon = polygon.slice(1)
 
-                polygon = polygon.slice(0,1)
+                polygon = polygon.slice(0, 1)
                 polygon.forEach((linearring: number[][]) => {
-                    drawer(linearring, ctx,this.drawScale);
+                    drawer(linearring, ctx, this.drawScale);
                 });
 
 
@@ -185,9 +151,9 @@ class Client {
     //폐곡선 그리기
     //input: Array of points
     //effect: Draw a linear-ring on the CanvasRenderingContext2D
-    private drawLinearring(linearring: Array<Array<number>>, ctx: CanvasRenderingContext2D, drawScale:number): void {
+    private drawLinearring(linearring: Array<Array<number>>, ctx: CanvasRenderingContext2D, drawScale: number): void {
         ctx.save();
-        ctx.scale(1/drawScale, 1/drawScale)
+        ctx.scale(1 / drawScale, 1 / drawScale)
         ctx.beginPath();
         const last = linearring[linearring.length - 1];
         ctx.moveTo(last[0], last[1]);
@@ -201,8 +167,8 @@ class Client {
     }
 
     private marginalDimension(margin: number, image: HTMLImageElement): [number, number] {
-        const width = Math.ceil(image.width*this.drawScale + margin * 2);
-        const height = Math.ceil(image.height*this.drawScale + margin * 2);
+        const width = Math.ceil(image.width * this.drawScale + margin * 2);
+        const height = Math.ceil(image.height * this.drawScale + margin * 2);
         return [width, height]
 
     }
@@ -210,7 +176,7 @@ class Client {
     //side-effect: 캔버스 더러워짐
     private createSDF(ctx: CanvasRenderingContext2D, margin: number, image: HTMLImageElement): Array<number> {
 
-        const [width, height] = this.marginalDimension(margin,image);
+        const [width, height] = this.marginalDimension(margin, image);
 
         ctx.canvas.width = width;
         ctx.canvas.height = height;
@@ -218,7 +184,7 @@ class Client {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
         //샘플 이미지를 그린다.
-        ctx.drawImage(image, margin, margin, image.width*this.drawScale, image.height*this.drawScale);
+        ctx.drawImage(image, margin, margin, image.width * this.drawScale, image.height * this.drawScale);
 
         const opaque = 1;
         const transparent = 0;
@@ -248,7 +214,7 @@ class Client {
         return distance;
 
     }
-    private createContours(distance: any, targets: Array<number>,dimension: [number, number]) {
+    private createContours(distance: any, targets: Array<number>, dimension: [number, number]) {
 
         // 등고선 적용
         const contours4 = contours()
