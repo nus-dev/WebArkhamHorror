@@ -1,13 +1,5 @@
-// class Client {
-//     constructor() {
-//         const playGround: HTMLDivElement = document.getElementById('playGround') as HTMLDivElement;
-//     }
-// }
-
-// export default new Client();
-
 import {createStore} from 'redux'
-import {DecreaseAction, IncreaseAction} from './action/Action'
+import { DecreaseAction, IncreaseAction } from '../action/Action'
 
 /**
  * This is a reducer, a pure function with (state, action) => state signature.
@@ -21,7 +13,7 @@ import {DecreaseAction, IncreaseAction} from './action/Action'
  * follows a different convention (such as function maps) if it makes sense for your
  * project.
  */
-function counter(state = 0, action: any) {
+function counter(state = 0, action) {
     switch (action.type) {
         case 'INCREMENT':
             return state + 1
