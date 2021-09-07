@@ -1,5 +1,5 @@
 import {Store} from "../store/Store";
-import {DecreaseCountAction, IncreaseCountAction} from "../action/Action";
+import {decreaseCount, increaseCount, redo, setCount, undo} from "../action/Action";
 import {useState} from 'react';
 
 export function CounterView() {
@@ -7,9 +7,12 @@ export function CounterView() {
     Store.subscribe(() => setNumber(Store.getState().count));
     return (
         <div>
-            <h1>{count}</h1>
-            <button onClick={() => Store.dispatch(IncreaseCountAction)}>IncreaseAction</button>
-            <button onClick={() => Store.dispatch(DecreaseCountAction)}>DecreaseAction</button>
+            <h1>{count.present}</h1>
+            <button onClick={increaseCount}>IncreaseAction</button>
+            <button onClick={decreaseCount}>DecreaseAction</button>
+            <input type="range" min="1" max="100" onChange={(e) => setCount(Number(e.target.value))} value={count.present} className="slider" id="myRange" />
+            <button onClick={undo}>UNDO</button>
+            <button onClick={redo}>REDO</button>
         </div>
     );
-  }
+}

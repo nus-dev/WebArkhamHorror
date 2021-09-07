@@ -1,13 +1,9 @@
-export const initialState: {
-    color: string,
-    count: 0,
-    page: {
-        items: Array<any>;
-    }
-} = {
+import {Item} from '../model/Item';
+
+export const initialState = {
     color: 'black',
     count: 0,
-    page: {
-        items: []
-    }
+    // page: {
+    //     items: [] as Array<Item>
+    // }
 };

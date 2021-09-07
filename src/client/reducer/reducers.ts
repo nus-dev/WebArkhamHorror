@@ -1,31 +1,48 @@
-import {Action, combineReducers } from "redux";
+import {Action, AnyAction, combineReducers } from "redux";
+import undoable, {groupByActionTypes} from "redux-undo";
+import { increateAction } from "../action/Action";
 import {initialState} from "../State/state";
-import {colorReducer} from "./Color/ColorReducer";
 
-function counter(state = initialState.count, action: Action) {
+function counter(state = initialState.count, action: AnyAction) {
     switch (action.type) {
         case 'INCREMENT':
             return state + 1
         case 'DECREMENT':
             return state - 1
+        case 'SETCOUNT':
+            return action.count
         default:
             return state
     }
 }
 
-function itemsReducer(items = initialState.page.items, action: any) {
+// function itemsReducer(items = initialState.page.items, action: AnyAction) {
+//     switch (action.type) {
+//         case 'ADDITEM':
+//             return items.concat(action.item);
+//         default:
+//             return items;
+//     }
+// }
+
+function colorReducer(state = initialState.color, action: AnyAction) {
     switch (action.type) {
-        case 'ADDITEM':
-            return items.concat(action.item);
+        case 'SETCOLOR': 
+            return action.color;
         default:
-            return items;
+            return state;
     }
-}
+};
 
 export default combineReducers({
     color: colorReducer,
-    count: counter,
-    page: combineReducers({
-        items: itemsReducer
-    })
+    count: undoable(counter, {
+        groupBy: groupByActionTypes([
+            'SETCOUNT'
+        ])
+    }),
+    // count: counter,
+    // page: combineReducers({
+    //     items: itemsReducer
+    // })
 });
