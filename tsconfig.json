@@ -1,11 +1,27 @@
 {
   "compilerOptions": {
-      "outDir": "./build/",
-      "sourceMap": true,
-      "noImplicitAny": true,
-      "module": "commonjs",
-      "target": "es6",
-      "jsx": "react",
-      "typeRoots": ["./types"]
-  }
+    "module": "commonjs",
+    "target": "es2018",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": [
+        "src/shared/*"
+      ]
+    },
+    "experimentalDecorators": true,
+    "esModuleInterop": true
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "baseUrl": "types",
+  "typeRoots": [
+    "types"
+  ]
 }

@@ -1,9 +1,9 @@
-import * as express from 'express';
-import * as http from 'http';
-import * as path from 'path';
+import express from 'express';
+import http from 'http';
+import path from 'path';
 // import DBAgent from './agent/db/DBAgent';
 // import {LoginApi} from './api/LoginApi';
-import * as bodyParser from 'body-parser';
+import bodyParser from 'body-parser';
 
 class Server {
     // 포트번호
