@@ -6,4 +6,5 @@ export const initialState = {
     // page: {
     //     items: [] as Array<Item>
     // }
+    pipe: true
 };
