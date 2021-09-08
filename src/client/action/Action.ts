@@ -11,8 +11,21 @@ export function decreaseCount(): void {
     Store.dispatch({type: 'DECREMENT'});
 }
 
+export const increateAction2 = {type: 'INCREMENT2'};
+export function increaseCount2(): void {
+    Store.dispatch(increateAction2);
+}
+
+export function decreaseCount2(): void {
+    Store.dispatch({type: 'DECREMENT2'});
+}
+
 export function setCount(count: number): void {
     Store.dispatch({type: 'SETCOUNT', count});
+}
+
+export function setCount2(count: number): void {
+    Store.dispatch({type: 'SETCOUNT2', count});
 }
 
 export function setColor(color: string): void {

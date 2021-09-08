@@ -3,17 +3,17 @@ import {decreaseCount, increaseCount, redo, setCount, undo} from "../action/Acti
 import {useState} from 'react';
 
 export function CounterView() {
-    const [count, setNumber] = useState(Store.getState().count);
-    Store.subscribe(() => setNumber(Store.getState().count));
+    const [count, setNumber] = useState(Store.getState().present.count);
+    Store.subscribe(() => setNumber(Store.getState().present.count));
     return (
         <div>
-            <h1>{count.present}</h1>
+            <h1>{count}</h1>
             <button onClick={increaseCount}>IncreaseAction</button>
             <button onClick={decreaseCount}>DecreaseAction</button>
             <input type="range" min="1" max="100" onMouseUp={() => {
-                console.log('pipe');
-                Store.dispatch({type: 'pipe'})
-            }} onChange={(e) => setCount(Number(e.target.value))} value={count.present} className="slider" id="myRange" />
+                undo();
+                redo();
+            }} onChange={(e) => setCount(Number(e.target.value))} value={count} className="slider" id="myRange" />
             <button onClick={undo}>UNDO</button>
             <button onClick={redo}>REDO</button>
         </div>

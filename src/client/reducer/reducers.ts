@@ -15,14 +15,27 @@ function counter(state = initialState.count, action: AnyAction) {
     }
 }
 
-// function itemsReducer(items = initialState.page.items, action: AnyAction) {
-//     switch (action.type) {
-//         case 'ADDITEM':
-//             return items.concat(action.item);
-//         default:
-//             return items;
-//     }
-// }
+function counter2(state = initialState.count2, action: AnyAction) {
+    switch (action.type) {
+        case 'INCREMENT2':
+            return state + 1
+        case 'DECREMENT2':
+            return state - 1
+        case 'SETCOUNT2':
+            return action.count
+        default:
+            return state
+    }
+}
+
+function itemsReducer(items = initialState.page.items, action: AnyAction) {
+    switch (action.type) {
+        case 'ADDITEM':
+            return items.concat(action.item);
+        default:
+            return items;
+    }
+}
 
 function colorReducer(state = initialState.color, action: AnyAction) {
     switch (action.type) {
@@ -33,31 +46,17 @@ function colorReducer(state = initialState.color, action: AnyAction) {
     }
 };
 
-function pipeReducer(state = initialState.pipe, action: Action): boolean {
-    switch (action.type) {
-        case 'pipe':
-            return !state;
-        default:
-            return state;
-    }
-}
-
-export default combineReducers({
-    color: colorReducer,
-    count: undoable(counter, {
-        // filter: (action, currentState, previousHistory) => {
-        //     console.log(action, currentState, previousHistory);
-        //     return true;
-        // },
-        // groupBy: (action, currentState, previousHistory) => {
-        //     console.log(action, currentState, previousHistory);
-        // }
+export default undoable(
+    combineReducers({
+        color: colorReducer,
+        count: counter,
+        count2: counter2,
+        page: combineReducers({
+            items: itemsReducer
+        })
+    }), {
         groupBy: groupByActionTypes([
-            'SETCOUNT'
+            'SETCOUNT', 'SETCOUNT2'
         ])
-    }),
-    // page: combineReducers({
-    //     items: itemsReducer
-    // })
-    pipe: pipeReducer
-});
+    }
+);

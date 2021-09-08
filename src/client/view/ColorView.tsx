@@ -2,8 +2,8 @@ import {Store} from "../store/Store";
 import {useState} from 'react';
 
 export function ColorView() {
-    const [color, setColor] = useState(Store.getState().color);
-    Store.subscribe(() => setColor(Store.getState().color));
+    const [color, setColor] = useState(Store.getState().present.color);
+    Store.subscribe(() => setColor(Store.getState().present.color));
     return (
         <div>
             <h1>{color}</h1>
